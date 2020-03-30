@@ -9,14 +9,7 @@ public class App
     public static void main( String[] args )
     {
         App obj = new App();
-        obj.runMe("error message");
-
-        try{
-			obj.divide();
-		}catch(ArithmeticException ex){
-			logger.error("Sorry, something went wrong!", ex);
-        }
-        
+        obj.runMe("error message");        
     }
 
     private void runMe(String parameter)
@@ -35,9 +28,4 @@ public class App
 		logger.error("This is error : " + parameter);
 		logger.fatal("This is fatal : " + parameter);
     }
-
-    private void divide()
-    {
-		int i = 10 /0;
-	}
 }
