@@ -4,5 +4,3 @@ target/
 .factorypath
 .project
 .settings/
-.env
-src/test
