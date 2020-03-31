@@ -4,3 +4,4 @@ target/
 .factorypath
 .project
 .settings/
+.env

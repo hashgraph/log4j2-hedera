@@ -7,13 +7,13 @@ import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.apache.logging.log4j.core.layout.JsonLayout;
+import io.github.cdimascio.dotenv.Dotenv;
 
-import java.io.Serializable;
+import java.time.Instant;
 
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.HederaNetworkException;
 import com.hedera.hashgraph.sdk.HederaStatusException;
-import com.hedera.hashgraph.sdk.Transaction;
 import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.consensus.ConsensusMessageSubmitTransaction;
@@ -30,15 +30,17 @@ public class Log4jHederaAppender extends AbstractAppender {
     public static final String LOG4J_MARKER = "log4j-Marker";
     public static final String THREAD_NAME = "log4j-Threadname";
 
-    // TODO: Move these to .env before commit
-    private static final AccountId OPERATOR_ID = AccountId.fromString("0.0.168454");
-    private static final Ed25519PrivateKey OPERATOR_KEY = Ed25519PrivateKey.fromString(
-            "302e020100300506032b657004220420d6177aa879b4b5d6568c030160156849aca8bf9ed12131959c2c16714482c062");
-    private static final String MIRROR_NODE_ADDRESS = "api.testnet.kabuto.sh:50211";
-    private ConsensusTopicId topicId = null;
+    private static final Dotenv dotenv = Dotenv.load();
+
+    private static final AccountId OPERATOR_ID = AccountId.fromString(dotenv.get("OPERATOR_ID"));
+    private static final Ed25519PrivateKey OPERATOR_KEY = Ed25519PrivateKey.fromString(dotenv.get("OPERATOR_KEY"));
+    private static final String MIRROR_NODE_ADDRESS = dotenv.get("MIRROR_NODE_ADDRESS");
+    private static final ConsensusTopicId TOPIC_ID = ConsensusTopicId.fromString(dotenv.get("TOPIC_ID"));
+
     private MirrorClient mirrorClient = null;
     private Client client = null;
 
+    // Instantiate Json layout
     private static Layout<String> layout = JsonLayout.createDefaultLayout();
 
     public Log4jHederaAppender() {
@@ -49,6 +51,7 @@ public class Log4jHederaAppender extends AbstractAppender {
         super(name, null, layout, true, null);
     }
 
+    // Plugin constructor
     @PluginFactory
     public static Log4jHederaAppender createAppender(@PluginAttribute("name") final String name) {
         if (name == null) {
@@ -59,16 +62,28 @@ public class Log4jHederaAppender extends AbstractAppender {
         return new Log4jHederaAppender(name);
     }
 
-    // TODO: allow for mainnet
-
+    // Create Mirror Client
     private final MirrorClient createMirrorClient() {
-        MirrorClient cl = new MirrorClient(MIRROR_NODE_ADDRESS);
+        String mirrorAddress = MIRROR_NODE_ADDRESS;
+        if(mirrorAddress == null) {
+            mirrorAddress = "api.testnet.kabuto.sh:50211";
+        }
+        MirrorClient cl = new MirrorClient(mirrorAddress);
 
         return cl;
     }
 
+    // Create client
     private final Client createClient() {
-        Client cl = Client.forTestnet();
+        String network = dotenv.get("NETWORK_NAME");
+        Client cl = null;
+        if (network == "testnet") {
+            cl = Client.forTestnet();
+        } else if (network == "mainnet") {
+            cl = Client.forMainnet();
+        } else {
+            System.out.println("NETWORK_NAME is incorrect in .env file, please make sure it is either \"testnet\" or \"mainnet\"");
+        }
 
         cl.setOperator(OPERATOR_ID, OPERATOR_KEY);
 
@@ -88,15 +103,30 @@ public class Log4jHederaAppender extends AbstractAppender {
 
         return ctid;
     }
+    
+    private final void checkTopic(ConsensusTopicId topicId) {
+        new MirrorConsensusTopicQuery()
+            .setTopicId(topicId)
+            .setStartTime(Instant.ofEpochSecond(0))
+            .setLimit(1)  // Try to get the first message from topic to make sure it exists
+            .subscribe(mirrorClient, null, Throwable::printStackTrace);
+    }
 
+    // Main Logging function, creates a topic if needed, then uses json formatter to send messages to the topic
     private final void logIt(String content) throws HederaNetworkException, HederaStatusException {
-        if (topicId == null)
+        ConsensusTopicId topicId = TOPIC_ID;
+        if (mirrorClient == null && client == null)
         {
             mirrorClient = createMirrorClient();
             client = createClient();
+        }
+        if (topicId == null)
+        {
             TransactionId txid = createTopic(client);
             topicId = getTopicId(txid, client);
-            System.out.println("Created New Topic Id for log: " + topicId);
+            System.out.println("Created New Topic Id for logging: " + topicId);
+        } else {
+            checkTopic(topicId);
         }
 
 
@@ -110,7 +140,6 @@ public class Log4jHederaAppender extends AbstractAppender {
     //Receive LogEvent and send to HCS
     @Override
     public void append(LogEvent logEvent) {
-        System.out.println(this.getLayout());
         try {
             logIt(layout.toSerializable(logEvent));
         } catch (HederaNetworkException e) {

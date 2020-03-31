@@ -1,15 +1,14 @@
 package com.hedera;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import com.hedera.Log4jHederaAppender;
 
 public class App 
 {
     final static Logger logger = LogManager.getLogger(App.class);
     public static void main( String[] args )
     {
-        App obj = new App();
-        obj.runMe("error message");        
+        App app = new App();
+        app.runMe("error message");        
     }
 
     private void runMe(String parameter)
