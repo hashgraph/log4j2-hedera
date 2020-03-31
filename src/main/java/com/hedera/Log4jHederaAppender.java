@@ -22,6 +22,7 @@ import com.hedera.hashgraph.sdk.consensus.ConsensusTopicId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import com.hedera.hashgraph.sdk.mirror.MirrorClient;
 import com.hedera.hashgraph.sdk.mirror.MirrorConsensusTopicQuery;
+import com.hedera.hashgraph.sdk.mirror.MirrorSubscriptionHandle;
 
 @Plugin(name = "Log4jHedera", category = "Core", elementType = "appender", printObject = true)
 public class Log4jHederaAppender extends AbstractAppender {
@@ -77,12 +78,12 @@ public class Log4jHederaAppender extends AbstractAppender {
     private final Client createClient() {
         String network = dotenv.get("NETWORK_NAME");
         Client cl = null;
-        if (network == "testnet") {
+        if (network.equals("testnet")) {
             cl = Client.forTestnet();
-        } else if (network == "mainnet") {
+        } else if (network.equals("mainnet")) {
             cl = Client.forMainnet();
         } else {
-            System.out.println("NETWORK_NAME is incorrect in .env file, please make sure it is either \"testnet\" or \"mainnet\"");
+            System.out.println("Error in Log4jHedera: NETWORK_NAME is incorrect in .env file, please make sure it is either \"testnet\" or \"mainnet\"");
         }
 
         cl.setOperator(OPERATOR_ID, OPERATOR_KEY);
@@ -91,25 +92,29 @@ public class Log4jHederaAppender extends AbstractAppender {
     }
 
     // Create new Topic
-    private final TransactionId createTopic(Client client) throws HederaNetworkException, HederaStatusException {
-        TransactionId txid = new ConsensusTopicCreateTransaction().execute(client);
+    // private final TransactionId createTopic(Client client) throws HederaNetworkException, HederaStatusException {
+    //     TransactionId txid = new ConsensusTopicCreateTransaction().execute(client);
 
-        return txid;
-    }
+    //     return txid;
+    // }
 
     // Get TopicId
-    private final ConsensusTopicId getTopicId(TransactionId txid, Client client) throws HederaStatusException {
-        ConsensusTopicId ctid = txid.getReceipt(client).getConsensusTopicId();
+    // private final ConsensusTopicId getTopicId(TransactionId txid, Client client) throws HederaStatusException {
+    //     ConsensusTopicId ctid = txid.getReceipt(client).getConsensusTopicId();
 
-        return ctid;
-    }
+    //     return ctid;
+    // }
     
     private final void checkTopic(ConsensusTopicId topicId) {
-        new MirrorConsensusTopicQuery()
+        System.out.println("About to read Topic" + topicId);
+        
+        MirrorSubscriptionHandle msh = new MirrorConsensusTopicQuery()
             .setTopicId(topicId)
             .setStartTime(Instant.ofEpochSecond(0))
             .setLimit(1)  // Try to get the first message from topic to make sure it exists
             .subscribe(mirrorClient, null, Throwable::printStackTrace);
+        
+        System.out.println("msh: " + msh.toString());
     }
 
     // Main Logging function, creates a topic if needed, then uses json formatter to send messages to the topic
@@ -119,16 +124,16 @@ public class Log4jHederaAppender extends AbstractAppender {
         {
             mirrorClient = createMirrorClient();
             client = createClient();
-        }
-        if (topicId == null)
-        {
-            TransactionId txid = createTopic(client);
-            topicId = getTopicId(txid, client);
-            System.out.println("Created New Topic Id for logging: " + topicId);
-        } else {
             checkTopic(topicId);
         }
 
+        // TODO: Discussion: ReAdd create topic???
+        // if (topicId == null)
+        // {
+        //     TransactionId txid = createTopic(client);
+        //     topicId = getTopicId(txid, client);
+        //     System.out.println("Created New Topic Id for logging: " + topicId);
+        // }
 
         new ConsensusMessageSubmitTransaction()
             .setTopicId(topicId)
