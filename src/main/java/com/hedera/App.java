@@ -8,7 +8,7 @@ public class App
     public static void main( String[] args )
     {
         App app = new App();
-        app.runMe("So you fail to read, but can Write???");        
+        app.runMe("No receipts");        
     }
 
     private void runMe(String parameter)
