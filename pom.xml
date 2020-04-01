@@ -5,12 +5,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.hedera.hashgraph</groupId>
-  <artifactId>log4j-hedera</artifactId>
+  <artifactId>log4j2-hedera</artifactId>
   <version>0.1</version>
 
   <packaging>jar</packaging>
 
-  <name>log4j-hedera</name>
+  <name>log4j2-hedera</name>
   <url>https://github.com/hashgraph/log4j2-hedera</url>
 
   <properties>

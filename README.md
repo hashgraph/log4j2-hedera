@@ -23,7 +23,7 @@ $ mvn package
 * Install the jar to your project by running this in your project's directory:
 ```
 $ mvn install:install-file -Dfile=<path-to-jar-file> -DgroupId=com.hedera.hashgraph \
-    -DartifactId=log4j-hedera -Dversion=0.1 -Dpackaging=jar
+    -DartifactId=log4j2-hedera -Dversion=0.1 -Dpackaging=jar
 ```
 
 
@@ -39,8 +39,8 @@ $ mvn install:install-file -Dfile=<path-to-jar-file> -DgroupId=com.hedera.hashgr
     </dependency>
     <dependency>
         <groupId>com.hedera.hashgraph</groupId>
-        <artifactId>hedera-log4j</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <artifactId>log4j2-hedera</artifactId>
+        <version>0.1</version>
     </dependency>
     <dependency>
         <groupId>com.hedera.hashgraph</groupId>
