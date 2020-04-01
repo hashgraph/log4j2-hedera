@@ -2,7 +2,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
     <Appenders>
-        <HederaAppender name="HederaAppender" operator_id="0.0.555555" topic_id="0.0.555556" operator_key="Ed25519PrivateKeyHere" network_name="testnet_or_mainnet" />
+        <HederaAppender name="HederaAppender" operatorId="0.0.555555" topicId="0.0.555556" operatorKey="Ed25519PrivateKeyHere" networkName="testnet_or_mainnet" />
     </Appenders>
     <Loggers>
         <Root level="error">

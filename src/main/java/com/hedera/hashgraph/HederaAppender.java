@@ -20,28 +20,29 @@ import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
 @Plugin(name = "HederaAppender", category = "Core", elementType = "appender", printObject = true)
 public class HederaAppender extends AbstractAppender {
-    public static final String APPENDER_NAME = "hedera-appender";
     public static final String LOG4J_NDC = "log4j-NDC";
     public static final String LOG4J_MARKER = "log4j-Marker";
     public static final String THREAD_NAME = "log4j-Threadname";
 
-    private static ConsensusTopicId TOPIC_ID;
-    private static AccountId OPERATOR_ID;
-    private static Ed25519PrivateKey OPERATOR_KEY;
-    private static String NETWORK_NAME;
-    private static Ed25519PrivateKey SUBMIT_KEY;
+    private String topicId;
+    private String operatorId;
+    private String operatorKey;
+    private String networkName;
+    private String submitKey;
 
     private Client client;
 
     // Instantiate Json layout
     private static Layout<String> layout = JsonLayout.createDefaultLayout();
 
-    public HederaAppender() {
-        this(APPENDER_NAME);
-    }
-
-    protected HederaAppender(String name) {
+    private HederaAppender(String name, String topicId, String operatorId, String operatorKey, String networkName, String submitKey) {
         super(name, null, layout, true, null);
+
+        this.topicId = topicId;
+        this.operatorId = operatorId;
+        this.operatorKey = operatorKey;
+        this.networkName = networkName;
+        this.submitKey = submitKey;
     }
 
     // TODO: Probably cleaner to use a builder here instead
@@ -52,39 +53,38 @@ public class HederaAppender extends AbstractAppender {
         @Required(message = "No name provided for HederaAppender") 
         final String name,
 
-        @PluginAttribute("topic_id") 
-        @Required(message = "No topic_id provided for HederaAppender") 
-        final String topic_id,
+        @PluginAttribute("topicId") 
+        @Required(message = "No topicId provided for HederaAppender") 
+        final String topicId,
 
-        @PluginAttribute("operator_id") 
-        @Required(message = "No operator_id provided for HederaAppender") 
-        final String operator_id,
+        @PluginAttribute("operatorId") 
+        @Required(message = "No operatorId provided for HederaAppender") 
+        final String operatorId,
 
-        @PluginAttribute("operator_key") 
-        @Required(message = "No operator_key provided for HederaAppender") 
-        final String operator_key,
+        @PluginAttribute("operatorKey") 
+        @Required(message = "No operatorKey provided for HederaAppender") 
+        final String operatorKey,
 
-        @PluginAttribute("network_name") 
-        @Required(message = "No network_name provided for HederaAppender") 
-        final String network_name,
+        @PluginAttribute("networkName") 
+        @Required(message = "No networkName provided for HederaAppender") 
+        final String networkName,
 
-        @PluginAttribute("submit_key") 
-        final String submit_key
+        @PluginAttribute("submitKey") 
+        final String submitKey
     ) {
-        TOPIC_ID = ConsensusTopicId.fromString(topic_id);
-        OPERATOR_ID = AccountId.fromString(operator_id);
-        OPERATOR_KEY = Ed25519PrivateKey.fromString(operator_key);
-        NETWORK_NAME = network_name;
-        if (submit_key != null) {
-            SUBMIT_KEY = Ed25519PrivateKey.fromString(submit_key);
-        }
-
-        return new HederaAppender(name);
+        return new HederaAppender(
+            name, 
+            topicId, 
+            operatorId, 
+            operatorKey, 
+            networkName, 
+            submitKey
+        );
     }
 
     // Create client
     private final Client createClient() {
-        String network = NETWORK_NAME;
+        String network = networkName;
         Client cl = null;
         if (network.equals("testnet")) {
             cl = Client.forTestnet();
@@ -95,15 +95,15 @@ public class HederaAppender extends AbstractAppender {
                     "Error in Log4jHedera: NETWORK_NAME is incorrect in .env file, please make sure it is either \"testnet\" or \"mainnet\"");
         }
 
-        cl.setOperator(OPERATOR_ID, OPERATOR_KEY);
+        cl.setOperator(AccountId.fromString(operatorId), Ed25519PrivateKey.fromString(operatorKey));
 
         return cl;
     }
 
-    // Main HCS function: creates client on first pass, builds transaction, optionally signs with submit_key, 
+    // Main HCS function: creates client on first pass, builds transaction, optionally signs with submitKey, 
     // then sends pre-formatted messages to selected topic
     private final void sendLogs(String content) throws HederaNetworkException, HederaStatusException {
-        ConsensusTopicId topicId = TOPIC_ID;
+        ConsensusTopicId topicId = ConsensusTopicId.fromString(this.topicId);
         if (client == null) {
             client = createClient();
         }
@@ -113,8 +113,8 @@ public class HederaAppender extends AbstractAppender {
             .setMessage(content)
             .build(client);
 
-        if (SUBMIT_KEY != null) {
-            consensusTransaction.sign(SUBMIT_KEY);
+        if (submitKey != null) {
+            consensusTransaction.sign(Ed25519PrivateKey.fromString(this.submitKey));
         }
 
         // TODO: add .executeAsync functionality

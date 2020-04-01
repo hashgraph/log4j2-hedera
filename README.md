@@ -125,21 +125,21 @@ Note: All attribute values should be Strings.
 ```name```\
 The name of the appender
 
-```topic_id```\
+```topicId```\
 The ID of your topic in the form of `shard.realm.num`
 
-```operator_id```\
+```operatorId```\
 Your Hedera Account ID in the form of `shard.realm.num`
 
-```operator_key```\
+```operatorKey```\
 Your Hedera Account Ed25519 Private Key
 
-```network_name```\
+```networkName```\
 The name of the network you wish to log to, either `testnet` or `mainnet`
 
 ##### Optional:
 
-```submit_key```\
+```submitKey```\
 If your HCS topic was created with a submit key, you must provide an Ed25519 Private Key\
 (your submit key) to sign each message with
 
