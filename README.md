@@ -139,9 +139,6 @@ The name of the network you wish to log to, either `testnet` or `mainnet`
 
 ##### Optional:
 
-```mirror_node_address```\
-The address of the Hedera mirror node you wish to use, set to the [kabuto.sh](https://docs.kabuto.sh) mirror node by default
-
 ```submit_key```\
 If your HCS topic was created with a submit key, you must provide an Ed25519 Private Key\
 (your submit key) to sign each message with

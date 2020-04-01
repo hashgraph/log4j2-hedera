@@ -17,7 +17,6 @@ import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.consensus.ConsensusMessageSubmitTransaction;
 import com.hedera.hashgraph.sdk.consensus.ConsensusTopicId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
-import com.hedera.hashgraph.sdk.mirror.MirrorClient;
 
 @Plugin(name = "HederaAppender", category = "Core", elementType = "appender", printObject = true)
 public class HederaAppender extends AbstractAppender {
@@ -29,11 +28,9 @@ public class HederaAppender extends AbstractAppender {
     private static ConsensusTopicId TOPIC_ID;
     private static AccountId OPERATOR_ID;
     private static Ed25519PrivateKey OPERATOR_KEY;
-    private static String MIRROR_NODE_ADDRESS;
     private static String NETWORK_NAME;
     private static Ed25519PrivateKey SUBMIT_KEY;
 
-    private MirrorClient mirrorClient;
     private Client client;
 
     // Instantiate Json layout
@@ -71,9 +68,6 @@ public class HederaAppender extends AbstractAppender {
         @Required(message = "No network_name provided for HederaAppender") 
         final String network_name,
 
-        @PluginAttribute("mirror_node_address") 
-        final String mirror_node_address,
-
         @PluginAttribute("submit_key") 
         final String submit_key
     ) {
@@ -81,25 +75,11 @@ public class HederaAppender extends AbstractAppender {
         OPERATOR_ID = AccountId.fromString(operator_id);
         OPERATOR_KEY = Ed25519PrivateKey.fromString(operator_key);
         NETWORK_NAME = network_name;
-        if (mirror_node_address != null) {
-            MIRROR_NODE_ADDRESS = mirror_node_address;
-        }
         if (submit_key != null) {
             SUBMIT_KEY = Ed25519PrivateKey.fromString(submit_key);
         }
 
         return new HederaAppender(name);
-    }
-
-    // Create Mirror Client
-    private final MirrorClient createMirrorClient() {
-        String mirrorAddress = MIRROR_NODE_ADDRESS;
-        if (mirrorAddress == null) {
-            mirrorAddress = "api.testnet.kabuto.sh:50211";
-        }
-        MirrorClient cl = new MirrorClient(mirrorAddress);
-
-        return cl;
     }
 
     // Create client
@@ -124,8 +104,7 @@ public class HederaAppender extends AbstractAppender {
     // then sends pre-formatted messages to selected topic
     private final void sendLogs(String content) throws HederaNetworkException, HederaStatusException {
         ConsensusTopicId topicId = TOPIC_ID;
-        if (mirrorClient == null && client == null) {
-            mirrorClient = createMirrorClient();
+        if (client == null) {
             client = createClient();
         }
 
