@@ -12,17 +12,22 @@ Join the [Hedera discord](https://hedera.com/discord) for the latest updates and
 
 Setup with Maven and Gradle coming soon!
 
-#### Instructions for building from this repo with Maven
+#### Instructions for Building from this Repo with Maven
 
-Build the jar with Maven:
-```mvn package```
-
-Install the jar to your project by running this in your project's directory:
+* Build the jar with Maven:
 ```
-mvn install:install-file -Dfile=<path-to-jar-file> -DgroupId=com.hedera.hashgraph -DartifactId=log4j-hedera -Dversion=0.1 -Dpackaging=jar
+$ mvn package
 ```
 
-Add the following dependencies to your project's pom.xml:
+
+* Install the jar to your project by running this in your project's directory:
+```
+$ mvn install:install-file -Dfile=<path-to-jar-file> -DgroupId=com.hedera.hashgraph \
+    -DartifactId=log4j-hedera -Dversion=0.1 -Dpackaging=jar
+```
+
+
+* Add the following dependencies to your project's pom.xml:
 ```
 ...
 <dependencies>
@@ -56,16 +61,20 @@ Add the following dependencies to your project's pom.xml:
 ...
 ```
 
-Create the directory `src/main/resources` in your project
 
-Add the file `log4j2.xml` to the resources directory you just made in your project.  An example configuration file is in this repo.
+* Create the directory `src/main/resources` in your project
 
-Add HederaAppender under Appenders in the log4j2.xml like this:
+
+* Add the file `log4j2.xml` to the resources directory you just made in your project.  An example configuration file is in this repo.
+
+
+* Add HederaAppender under Appenders in the log4j2.xml like this:
 ```
 ...
 <Appenders>
     ...
-    <HederaAppender name="HederaAppender" operator_id="0.0.555555" topic_id="0.0.555556" operator_key="Ed25519PrivateKeyHere" network_name="testnet_or_mainnet" />
+    <HederaAppender name="HederaAppender" operator_id="0.0.555555" topic_id="0.0.555556" 
+        operator_key="Ed25519PrivateKeyHere" network_name="testnet_or_mainnet" />
 </Appenders>
 <Loggers>
     <Root level="error">
@@ -75,69 +84,67 @@ Add HederaAppender under Appenders in the log4j2.xml like this:
 ...
 ```
 
-Import the log4j packages `LogManager` and `Logger` like this:
+
+* Import the log4j packages `LogManager` and `Logger` like this:
 ```
-...
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-...
 ```
 
-Instantiate the logger like this:
+
+* Instantiate the logger like this:
 ```
-...
 final static Logger logger = LogManager.getLogger(App.class);
-...
 ```
 
-Log things like this:
+
+* Log things like this:
 ```
-...
 logger.debug("This is a debug log: " + message);
 logger.info("This is an info log : " + message);
 logger.warn("This is a warning log : " + message);
 logger.error("This is an error log : " + message);
 logger.fatal("This is a fatal log : " + message);
-...
 ```
 
 ## Configuration
 
-All configuration of the Appender is done in `log4j2.xml`.
+All configuration for the Appender is done in `log4j2.xml`.
 
-To log things under the level of error, make sure to change the line `<Root level="error">` to `<Root level="debug">`, `<Root level="info">`, or `<Root level="warn">`.
+To log things under the level of error, make sure to change the line `<Root level="error">` to `<Root level="debug">`,\
+`<Root level="info">`, or `<Root level="warn">`.
 
-Make sure you remember to change each of the `<HederaAppender>` attributes for your project!  The ones provided in the example won't work!
+Make sure you remember to change the values for each of the `<HederaAppender>` attributes in your project!  The ones provided in the example won't work as is!
 
 #### Attributes
 
-##### Required
+Note: All attribute values should be Strings.
 
-```topic_id```
-`String`
+##### Required:
+
+```name```\
+The name of the appender
+
+```topic_id```\
 The ID of your topic in the form of `shard.realm.num`
 
-```operator_id```
-`String`
+```operator_id```\
 Your Hedera Account ID in the form of `shard.realm.num`
 
-```operator_key```
-`String`
+```operator_key```\
 Your Hedera Account Ed25519 Private Key
 
-```network_name```
-`String`
+```network_name```\
 The name of the network you wish to log to, either `testnet` or `mainnet`
 
-##### Optional
+##### Optional:
 
-```mirror_node_address```
-`String`
+```mirror_node_address```\
 The address of the Hedera mirror node you wish to use, set to the [kabuto.sh](https://docs.kabuto.sh) mirror node by default
 
-```submit_key```
-`String`
-If your HCS topic was created with a submit key, you must provide an Ed25519 Private Key (your submit key) to sign each message with
+```submit_key```\
+If your HCS topic was created with a submit key, you must provide an Ed25519 Private Key\
+(your submit key) to sign each message with
 
 ## License
 
