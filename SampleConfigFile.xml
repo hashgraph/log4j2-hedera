@@ -1,15 +1,12 @@
-<!--File should be named log4j2.xml and placed in src/resources for your project-->
+<!--Your configuration file should be named log4j2.xml and placed in src/main/resources in your project-->
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
     <Appenders>
-        <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
-        </Console>
         <HederaAppender name="HederaAppender" operator_id="0.0.555555" topic_id="0.0.555556" operator_key="Ed25519PrivateKeyHere" network_name="testnet_or_mainnet" />
     </Appenders>
     <Loggers>
-    <Root level="error">
-        <AppenderRef ref="HederaAppender"/>
-    </Root>
+        <Root level="error">
+            <AppenderRef ref="HederaAppender"/>
+        </Root>
     </Loggers>
 </Configuration>

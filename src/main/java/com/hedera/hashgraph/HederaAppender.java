@@ -80,8 +80,10 @@ public class HederaAppender extends AbstractAppender {
         TOPIC_ID = ConsensusTopicId.fromString(topic_id);
         OPERATOR_ID = AccountId.fromString(operator_id);
         OPERATOR_KEY = Ed25519PrivateKey.fromString(operator_key);
-        MIRROR_NODE_ADDRESS = mirror_node_address;
         NETWORK_NAME = network_name;
+        if (mirror_node_address != null) {
+            MIRROR_NODE_ADDRESS = mirror_node_address;
+        }
         if (submit_key != null) {
             SUBMIT_KEY = Ed25519PrivateKey.fromString(submit_key);
         }
