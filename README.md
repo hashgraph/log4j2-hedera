@@ -3,70 +3,30 @@ Provides [Log4j 2.x] support for Hedera™ via an Appender that records logged e
 
 [Log4j 2.x]: https://logging.apache.org/log4j/2.x/
 
-## ⚠️ Disclaimer
+## Install
 
-This project is actively under development and not recommended for production use. 
-Join the [Hedera discord](https://hedera.com/discord) for the latest updates and announcements.
+##### Gradle
 
-## Setup
-
-Setup with Maven and Gradle coming soon!
-
-#### Instructions for Building from this Repo with Maven
-
-* Build the jar with Maven:
-```
-$ mvn package
+```groovy
+implementation 'com.hedera.hashgraph:log4j2:0.1.0'
 ```
 
+##### Maven
 
-* Install the jar to your project by running this in your project's directory:
-```
-$ mvn install:install-file -Dfile=<path-to-jar-file> -DgroupId=com.hedera.hashgraph \
-    -DartifactId=log4j2-hedera -Dversion=0.1 -Dpackaging=jar
+```xml
+<dependency>
+    <groupId>com.hedera.hashgraph</groupId>
+    <artifactId>log4j2</artifactId>
+    <version>0.1.0</version>
+</dependency>
 ```
 
-
-* Add the following dependencies to your project's pom.xml:
-```
-...
-<dependencies>
-    ...
-    <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-core</artifactId>
-        <version>2.13.1</version>
-    </dependency>
-    <dependency>
-        <groupId>com.hedera.hashgraph</groupId>
-        <artifactId>log4j2-hedera</artifactId>
-        <version>0.1</version>
-    </dependency>
-    <dependency>
-        <groupId>com.hedera.hashgraph</groupId>
-        <artifactId>sdk</artifactId>
-        <version>1.1.4</version>
-    </dependency>
-    <dependency>
-        <groupId>io.grpc</groupId>
-        <artifactId>grpc-okhttp</artifactId>
-        <version>1.24.0</version>
-    </dependency>
-    <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>2.9.10.3</version>
-    </dependency>
-</dependencies>
-...
-```
+## Usage
 
 
 * Create the directory `src/main/resources` in your project
 
-
 * Add the file `log4j2.xml` to the resources directory you just made in your project.  An example configuration file is in this repo.
-
 
 * Add HederaAppender under Appenders in the log4j2.xml like this:
 ```
