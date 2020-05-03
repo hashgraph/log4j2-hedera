@@ -103,6 +103,12 @@ The name of the network you wish to log to, either `testnet` or `mainnet`
 If your HCS topic was created with a submit key, you must provide an Ed25519 Private Key\
 (your submit key) to sign each message with
 
+## Contributing to this Project
+
+We welcome participation from all developers!
+For instructions on how to contribute to this repo, please
+review the [Contributing Guide](CONTRIBUTING.md).
+
 ## License
 
 Licensed under Apache License,
